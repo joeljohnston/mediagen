@@ -21,5 +21,4 @@ How to Package: python setup.py sdist
 
 
 Example execution: 
-python mediagen --basedir /data/ingest --daterangestart 2012-01-01 --daterangeend 2018-01-001 --filesizemin 1 --filesizemax 2 --mediasize 10 --dirdepth 3 --maxbasesubs 50 > /tmp/output
-
+python mediagen --basedir /data/ingest --daterangestart 2012-01-01 --daterangeend 2018-01-01 --filesizemin 1 --filesizemax 2 --mediasize 10 --dirdepth 3 --maxbasesubs 50 --maxnumfiles 10
