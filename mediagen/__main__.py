@@ -48,7 +48,10 @@ def _launch():
         print(j[2][0])
         if j[2][0] == 'jpg':
             c = createjpg()
-            c.jpggen(j)
+            c.jpggen(j,0,0)
+        if j[2][0] == 'mpg':
+            m = creatempg()
+            m.mpggen(j)
 
 if __name__ == '__main__':
     _launch()

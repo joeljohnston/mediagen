@@ -7,6 +7,8 @@ import string
 import time
 import datetime
 
+from util import util
+
 
 class createjpg:
     """Creates a jpg of random size and random modified date as fed by the parent mediagen package"""
@@ -17,7 +19,7 @@ class createjpg:
         imagename = ''.join([random.choice(string.ascii_letters) for n in range(16)])
         return imagename
 
-    def jpggen(self,filestruct):
+    def jpggen(self,filestruct,picx=300,picy=300):
         jpegname = self.jpgnamegen()
         print("jpegname: ",jpegname)
         print("jpegpath: ",filestruct[0][0] )
@@ -26,25 +28,18 @@ class createjpg:
         fullpath = ("%s/%s.%s") % (filestruct[0][0],jpegname,filestruct[2][0])
         print("jpg image fullpath: ", fullpath)
 
-        image = numpy.random.rand(300, 300, 3) * 255
+        if picx == 0 or picy == 0:
+            picx = random.randint(300,3890)
+            picy = random.randint(200,2160)
+
+        image = numpy.random.rand(picx,picy, 3) * 255
         image_out = Image.fromarray(image.astype('uint8')).convert('RGB')
         print("saving jpg to: ", fullpath)
         image_out.save(fullpath)
 
         print("raw: ", filestruct[1][0])
-        dataconcat = str(filestruct[1][0])
 
-        date = dataconcat.split("-",2)
+        #Change MTime
+        self.util.setmtime(filestruct)
 
-        print("year: ", date[0])
-        print("month: ", date[1])
-        print("day: ", date[2])
-
-
-        d = datetime.date(int(date[0]),int(date[1]),int(date[2]))
-        unixtime = time.mktime(d.timetuple())
-
-        #modify the file's mtime
-        atime = unixtime 
-        mtime = unixtime 
-        os.utime(fullpath,(atime,mtime))
+        return fullpath
