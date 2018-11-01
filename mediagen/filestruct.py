@@ -2,6 +2,7 @@ import sys
 import os
 import random
 import time
+from datetime import datetime
 
 class filestruct:
     def structcrawl(self, _basedir):
@@ -23,7 +24,7 @@ class filestruct:
         filetypes.append("txt")
         filetypes.append("jpg")
         filetypes.append("png")
-        filetypes.append("mpg")
+        filetypes.append("mp4")
         filetypes.append("mov")
         filetypes.append("bmp")
         filetypes.append("gif")
@@ -37,6 +38,8 @@ class filestruct:
         etime = time.mktime(time.strptime(str(_daterangeend), _dateformat))
 
         ptime = stime + prop * (etime - stime)
-        print(ptime)
+        print("timeint: ", int(ptime))
+        dt_obj = datetime.fromtimestamp(ptime)
+        print("ptime: ", dt_obj)
 
-        return time.strftime(_dateformat, time.localtime(ptime))
+        return dt_obj

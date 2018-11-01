@@ -40,6 +40,8 @@ class createjpg:
         print("raw: ", filestruct[1][0])
 
         #Change MTime
-        self.util.setmtime(filestruct)
+        #util.setmtime(fullpath)
+        utime = time.mktime(filestruct[1][0].timetuple())
+        os.utime(fullpath, (utime,utime))
 
         return fullpath

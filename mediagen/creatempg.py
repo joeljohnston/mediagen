@@ -6,81 +6,75 @@ import random
 import string
 import time
 import datetime
-import pymedia.video.vcodec as vcodec
-import pygame
+import cv2
 from util import util
 
 class creatempg:
-    """Creates a mpg of random size and random modified date as fed by the parent mediagen package"""
+    """Creates a mpg of random size (number of frames) and random modified date as fed by the parent mediagen package"""
     def __init__(self):
         print("Create a JPG Image")
 
     def mpgnamegen(self):
+        #Create a random name of the movie file
         moviename = ''.join([random.choice(string.ascii_letters) for n in range(16)])
         return moviename
 
-    def mpggen(self,filestruct,picx=300,picy=300):
+    def mpggen(self,filestruct,frames,picx=300,picy=300):
+
+        #instantiate a name
         mpgname = self.mpgnamegen()
-        print("mpgname: ",jpegname)
-        print("mpgpath: ",filestruct[0][0] )
-        print("mpgpath: ",filestruct[1][0] )
-        print("mpgpath: ",filestruct[2][0] )
+
+        #print("mpgname: ",mpgname)
+        #print("mpgpath: ",filestruct[0][0] )
+        #print("mpgdate: ",filestruct[1][0] )
+        #print("mpgpath: ",filestruct[2][0] )
         fullpath = ("%s/%s.%s") % (filestruct[0][0],mpgname,filestruct[2][0])
         print("mpg movie fullpath: ", fullpath)
 
-        numframes = random.randomint(300, 1800)
+        #create movie passing randomframes and target path
+        self.makeVideo( frames, fullpath)
 
-        makejpg = self.createjpg(dirstruct, 300, 300) 
+        #Set randomly assigned datetime to created file
+        if os.path.isfile(fullpath):
+            utime = time.mktime(filestruct[1][0].timetuple())
+            os.utime(fullpath, (utime,utime))
 
-        makeVideo( makejpg, fullpath, 'mpeg1video')
+    def makeVideo(self, inPattern, outFile):
+        #e= None
+        framelist = inPattern.split(",")
+        fw= open( outFile, 'w' )
 
-        #Change mtime on movie
-        self.util.setmtime(filestruct)
+        pathlist = inPattern.split(",")
+        frame = cv2.imread(pathlist[0])
+        #cv2.imshow('video',frame)
 
-    def makeVideo( inPattern, outFile, outCodec ):
-        # Get video stream dimensions from the image size
-        pygame.init()
-        i= 1
-        # Opening mpeg file for output
-        e= None
-        i= 1
-        fw= open( outFile, 'wb' )
-        while i:
-            if os.path.isfile( inPattern % i ):
-              s= pygame.image.load( inPattern % i )
-              if not e:
-                if outCodec== 'mpeg1video':
-                  bitrate= 2700000
-                else:
-                  bitrate= 9800000
+        #grab movie dimensions from first frame (all frames should be consistent)
+        if os.path.isfile(pathlist[0]):
+            height, width, channels = frame.shape
+        else:
+            height=300
+            width=300
+            channels=1
 
-                params= { \
-                  'type': 0,
-                  'gop_size': 12,
-                  'frame_rate_base': 125,
-                  'max_b_frames': 0,
-                  'height': s.get_height(),
-                  'width': s.get_width(),
-                  'frame_rate': 2997,
-                  'deinterlace': 0,
-                  'bitrate': bitrate,
-                  'id': vcodec.getCodecID( outCodec )
-                }
-                print('Setting codec to' , params)
-                e= vcodec.Encoder( params )
-                t= time.time()
+        out = cv2.VideoWriter(outFile,cv2.VideoWriter_fourcc(*'mp4v'), 10, (width,height))
 
-              # Create VFrame
-
-              ss= pygame.image.tostring(s, "RGB")
-              bmpFrame= vcodec.VFrame( vcodec.formats.PIX_FMT_RGB24, s.get_size(), (ss,None,None))
-              yuvFrame= bmpFrame.convert( vcodec.formats.PIX_FMT_YUV420P )
-              d= e.encode( yuvFrame )
-              fw.write( d )
-              i+= 1
+        for path in inPattern.split(","):
+            print("frame: ", path)
+            if os.path.isfile( path ):
+                frame = cv2.imread(path)
+                out.write(frame)
+                #cv2.imshow('video',frame)
+                if (cv2.waitKey(1) & 0xFF) == ord('q'):
+                    break
             else:
-              print('%d frames written in %.2f secs( %.2f fps )' % ( i, time.time()- t, float( i )/ ( time.time()- t ) ))
-              i= 0
+              #print('%d frames written in %.2f secs( %.2f fps )' % ( i, time.time()- t, float( i )/ ( time.time()- t ) ))
+                print("movie made")
+        out.release()
 
-        fw.close()
-        pygame.quit()
+        for dpath in inPattern.split(","):
+            if os.path.isfile( dpath ):
+                print("dpath: ",dpath)
+                os.remove(dpath)
+
+        #cv2.destroyAllWindows()
+        print("The output video is {}".format(outFile))
